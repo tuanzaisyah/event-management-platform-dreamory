@@ -16,7 +16,7 @@ router.put("/:id", verifyToken, updateEvent);
 
 router.get("/:id", verifyToken, getEvent);
 
-router.get("/", verifyToken, getEvents);
+router.get("/", getEvents);
 
 router.delete("/:id", verifyToken, deleteEvent);
 
