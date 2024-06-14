@@ -1,2 +1,5 @@
 # Ignore files related to API keys
-.env
+backend/.env
+
+# Ignore the technical assessment file
+Dreamory Interview - Technical Assessment (11062024).md

@@ -31,8 +31,7 @@ const EventModal = ({
   const [location, setLocation] = useState("");
   const [thumbnail, setThumbnail] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const [status, setStatus] = useState("");
-  const thumbnailUrl = "http://localhost:8800/images/";
+  const [status, setStatus] = useState("Ongoing");
 
   useEffect(() => {
     if (isUpdateType && eventData) {
@@ -41,29 +40,26 @@ const EventModal = ({
       setEndDate(moment(eventData.endDate).format("YYYY-MM-DD") || "");
       setLocation(eventData.location || "");
       setStatus(eventData.status || "");
-
-      if (!thumbnail) {
-        setThumbnailPreview(eventData.thumbnailUrl + thumbnail || null);
-      }
+      setThumbnailPreview(eventData.thumbnailUrl || null);
     } else {
-      // Clear form fields when modalType is 'add'
       setName("");
       setStartDate("");
       setEndDate("");
       setLocation("");
       setThumbnail(null);
       setThumbnailPreview(null);
-      setStatus("");
+      setStatus("Ongoing");
     }
-  }, [openModal, isUpdateType, eventData, thumbnail]);
+  }, [openModal, isUpdateType, eventData]);
 
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
-    setThumbnail(file);
     if (file) {
+      setThumbnail(file);
       setThumbnailPreview(URL.createObjectURL(file));
     } else {
-      setThumbnailPreview(eventData.thumbnailUrl || null);
+      setThumbnail(null);
+      setThumbnailPreview(null);
     }
   };
 
@@ -71,46 +67,25 @@ const EventModal = ({
     e.preventDefault();
 
     try {
-      const updatedEvent = {
-        name,
-        startDate,
-        endDate,
-        location,
-        status,
-      };
+      const updatedEvent = { name, startDate, endDate, location, status };
 
-      if (isUpdateType) {
-        // Update existing event
+      if (thumbnail) {
         const formData = new FormData();
+        const file = Date.now() + thumbnail.name;
         formData.append("name", thumbnail.name);
         formData.append("file", thumbnail);
 
-        // Upload thumbnail if it's changed
-        if (thumbnail) {
-          try {
-            await newRequest.post("/upload", formData);
-            updatedEvent.thumbnail = thumbnail.name;
-          } catch (error) {
-            console.error("Error uploading thumbnail:", error);
-          }
+        try {
+          await newRequest.post("/upload", formData);
+          updatedEvent.thumbnail = thumbnail.name;
+        } catch (error) {
+          console.error("Error uploading thumbnail:", error);
         }
+      }
 
+      if (isUpdateType) {
         await newRequest.put(`/event/${eventData._id}`, updatedEvent);
       } else {
-        // Create new event
-        if (thumbnail) {
-          const formData = new FormData();
-          formData.append("name", thumbnail.name);
-          formData.append("file", thumbnail);
-
-          try {
-            await newRequest.post("/upload", formData);
-            updatedEvent.thumbnail = thumbnail.name;
-          } catch (error) {
-            console.error("Error uploading thumbnail:", error);
-          }
-        }
-
         await newRequest.post("/event", updatedEvent);
       }
 
