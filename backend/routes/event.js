@@ -14,7 +14,7 @@ router.post("/", verifyToken, addEvent);
 
 router.put("/:id", verifyToken, updateEvent);
 
-router.get("/:id", verifyToken, getEvent);
+router.get("/:id", getEvent);
 
 router.get("/", getEvents);
 
