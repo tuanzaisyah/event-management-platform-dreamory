@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Button,
+  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -8,19 +9,40 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import newRequest from "../utils/newRequest";
+import getUser from "../utils/getUser";
 
 const DeleteDialog = ({ openModal, setOpenModal, eventData, onDelete }) => {
   const [password, setPassword] = useState("");
+  const [verification, setVerification] = useState("");
+  const user = getUser();
 
   const handleClose = () => {
     setOpenModal(false);
     setPassword("");
+    setVerification("");
   };
 
-  const handleDelete = () => {
-    onDelete(eventData);
-    setOpenModal(false);
-    setPassword("");
+  const handleDelete = async () => {
+    try {
+      // Verify password before deleting
+      const response = await newRequest.post("/auth/verifyPassword", {
+        email: user.email,
+        password: password,
+      });
+
+      if (response.status === 200) {
+        onDelete(eventData);
+        setOpenModal(false);
+        setPassword("");
+        setVerification("");
+      } else {
+        setVerification("Incorrect password. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying password:", error);
+      setVerification("Failed to verify password");
+    }
   };
 
   return (
@@ -39,6 +61,9 @@ const DeleteDialog = ({ openModal, setOpenModal, eventData, onDelete }) => {
           onChange={(e) => setPassword(e.target.value)}
         />
       </DialogContent>
+      <Typography variant="body2" color="error" sx={{ textAlign: "center" }}>
+        {verification}
+      </Typography>
       <DialogActions>
         <Button onClick={handleClose} style={{ color: "#333333" }}>
           Cancel
