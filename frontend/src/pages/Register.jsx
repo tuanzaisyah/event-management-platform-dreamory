@@ -17,7 +17,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
-    retypePassword: "", // Added retypePassword state
+    retypePassword: "",
   });
   const [error, setError] = useState(null);
 
